@@ -8,6 +8,7 @@
 #endif
 
 #include "WebSocketServer.hpp"
+#include "WebHUDHtml.hpp"
 #include <Geode/Geode.hpp>
 
 #include <iostream>
@@ -322,7 +323,7 @@ void WebSocketServer::handleClient(uintptr_t clientSocket) {
 #ifdef GEODE_IS_WINDOWS
     SOCKET sock = static_cast<SOCKET>(clientSocket);
 
-    // 1. Read HTTP Handshake
+    // 1. Read HTTP Request / Handshake
     char buffer[4096];
     int bytesRead = recv(sock, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead <= 0) {
@@ -330,8 +331,32 @@ void WebSocketServer::handleClient(uintptr_t clientSocket) {
         return;
     }
     buffer[bytesRead] = '\0';
+    std::string requestStr(buffer, bytesRead);
 
-    if (!doHandshake(clientSocket, std::string(buffer, bytesRead))) {
+    // Check if WebSocket upgrade
+    bool isWsUpgrade = (requestStr.find("Upgrade: websocket") != std::string::npos ||
+                        requestStr.find("upgrade: websocket") != std::string::npos);
+
+    if (!isWsUpgrade) {
+        // Standard HTTP request: Serve Web HUD!
+        if (requestStr.find("GET /favicon.ico") != std::string::npos) {
+            std::string noContent = "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n";
+            send(sock, noContent.data(), static_cast<int>(noContent.size()), 0);
+        } else {
+            std::ostringstream oss;
+            oss << "HTTP/1.1 200 OK\r\n"
+                << "Content-Type: text/html; charset=utf-8\r\n"
+                << "Content-Length: " << WebHUD::HTML_CONTENT.size() << "\r\n"
+                << "Connection: close\r\n\r\n"
+                << WebHUD::HTML_CONTENT;
+            std::string resp = oss.str();
+            send(sock, resp.data(), static_cast<int>(resp.size()), 0);
+        }
+        closesocket(sock);
+        return;
+    }
+
+    if (!doHandshake(clientSocket, requestStr)) {
         closesocket(sock);
         return;
     }
