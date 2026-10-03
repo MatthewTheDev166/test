@@ -25,31 +25,60 @@ AdbManager::~AdbManager() {
 std::filesystem::path AdbManager::locateAdb() {
     using namespace geode::prelude;
 
-    // 1. Mod resources folder
+    // Isolate platform-tools outside Steam's directory (inside Mod save directory).
+    // Steam monitors the game directory (steamapps/common/Geometry Dash/) and considers
+    // the game running as long as any executable inside that directory (like adb.exe) is alive!
+    std::filesystem::path isolatedDir;
+    try {
+        isolatedDir = Mod::get()->getSaveDir() / "platform-tools";
+    } catch (...) {
+        isolatedDir = std::filesystem::temp_directory_path() / "gd-mobile-stats" / "platform-tools";
+    }
+
+    auto isolatedAdb = isolatedDir / "adb.exe";
+
+    auto copyDependencies = [&](const std::filesystem::path& srcDir) {
+        try {
+            std::filesystem::create_directories(isolatedDir);
+            for (const auto& fname : {"adb.exe", "AdbWinApi.dll", "AdbWinUsbApi.dll"}) {
+                auto src = srcDir / fname;
+                auto dst = isolatedDir / fname;
+                if (std::filesystem::exists(src)) {
+                    std::error_code ec;
+                    std::filesystem::copy_file(src, dst, std::filesystem::copy_options::overwrite_existing, ec);
+                }
+            }
+        } catch (...) {}
+    };
+
+    // 1. If already isolated and present, use it
+    if (std::filesystem::exists(isolatedAdb)) {
+        return isolatedAdb;
+    }
+
+    // 2. Mod resources folder
     auto resDir = Mod::get()->getResourcesDir();
     if (std::filesystem::exists(resDir / "platform-tools" / "adb.exe")) {
-        return resDir / "platform-tools" / "adb.exe";
+        copyDependencies(resDir / "platform-tools");
+        if (std::filesystem::exists(isolatedAdb)) return isolatedAdb;
     }
     if (std::filesystem::exists(resDir / "adb.exe")) {
-        return resDir / "adb.exe";
+        copyDependencies(resDir);
+        if (std::filesystem::exists(isolatedAdb)) return isolatedAdb;
     }
 
-    // 2. Game folder / platform-tools
+    // 3. Game folder (migrate it out of Steam)
     auto gameDir = dirs::getGameDir();
     if (std::filesystem::exists(gameDir / "platform-tools" / "adb.exe")) {
-        return gameDir / "platform-tools" / "adb.exe";
+        copyDependencies(gameDir / "platform-tools");
+        if (std::filesystem::exists(isolatedAdb)) return isolatedAdb;
     }
 
-    // 3. Workspace / local directory (development mode)
+    // 4. Workspace / local directory (development mode)
     std::filesystem::path localDevPath = "platform-tools/adb.exe";
     if (std::filesystem::exists(localDevPath)) {
-        return std::filesystem::absolute(localDevPath);
-    }
-
-    // 4. Mod save / config dir
-    auto saveDir = Mod::get()->getSaveDir();
-    if (std::filesystem::exists(saveDir / "platform-tools" / "adb.exe")) {
-        return saveDir / "platform-tools" / "adb.exe";
+        copyDependencies("platform-tools");
+        if (std::filesystem::exists(isolatedAdb)) return isolatedAdb;
     }
 
     // 5. System PATH fallback
@@ -86,18 +115,39 @@ bool AdbManager::executeSilent(const std::string& cmdLine, std::string* output) 
     PROCESS_INFORMATION pi{};
     std::string commandCopy = cmdLine;
 
+    DWORD creationFlags = CREATE_NO_WINDOW;
+#ifdef CREATE_BREAKAWAY_FROM_JOB
+    creationFlags |= CREATE_BREAKAWAY_FROM_JOB;
+#endif
+
     BOOL success = CreateProcessA(
         NULL,
         commandCopy.data(),
         NULL,
         NULL,
         output ? TRUE : FALSE,
-        CREATE_NO_WINDOW,
+        creationFlags,
         NULL,
         NULL,
         &si,
         &pi
     );
+
+    if (!success && (creationFlags & CREATE_BREAKAWAY_FROM_JOB)) {
+        creationFlags = CREATE_NO_WINDOW;
+        success = CreateProcessA(
+            NULL,
+            commandCopy.data(),
+            NULL,
+            NULL,
+            output ? TRUE : FALSE,
+            creationFlags,
+            NULL,
+            NULL,
+            &si,
+            &pi
+        );
+    }
 
     if (output) {
         CloseHandle(hWritePipe);
@@ -153,6 +203,14 @@ void AdbManager::stop() {
     if (m_workerThread.joinable()) {
         m_workerThread.join();
     }
+
+    // Kill ADB daemon so it never lingers after GD exits
+    if (!m_cachedAdbPath.empty()) {
+        executeSilent("\"" + m_cachedAdbPath + "\" kill-server", nullptr);
+    }
+
+    m_deviceConnected.store(false);
+    m_reverseActive.store(false);
 }
 
 void AdbManager::adbLoop() {
@@ -206,5 +264,9 @@ void AdbManager::adbLoop() {
         for (int i = 0; i < intervalSec * 5 && m_running.load(); ++i) {
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
+    }
+
+    if (!m_cachedAdbPath.empty()) {
+        executeSilent("\"" + m_cachedAdbPath + "\" kill-server", nullptr);
     }
 }

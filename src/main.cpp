@@ -1,4 +1,5 @@
 #include <Geode/Geode.hpp>
+#include <Geode/loader/GameEvent.hpp>
 #include "server/WebSocketServer.hpp"
 #include "server/AdbManager.hpp"
 #include "stats/StatsManager.hpp"
@@ -22,6 +23,12 @@ $on_mod(Loaded) {
     // Start ADB daemon for USB reverse port forwarding
     AdbManager::get().start(port);
 
+    // Register atexit handler as safety fallback
+    std::atexit([]() {
+        AdbManager::get().stop();
+        WebSocketServer::get().stop();
+    });
+
     // Listen to setting changes
     listenForSettingChanges<int64_t>("server-port", [](int64_t newPort) {
         if (newPort > 0 && newPort <= 65535) {
@@ -30,4 +37,10 @@ $on_mod(Loaded) {
             AdbManager::get().start(p);
         }
     });
+}
+
+$on_game(Exiting) {
+    log::info("Geometry Dash is exiting, stopping GD Mobile Stats & killing ADB...");
+    AdbManager::get().stop();
+    WebSocketServer::get().stop();
 }
