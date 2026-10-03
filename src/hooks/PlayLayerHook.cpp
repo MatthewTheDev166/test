@@ -18,7 +18,8 @@ class $modify(MobileStatsPlayLayer, PlayLayer) {
         PlayLayer::update(dt);
 
         float percent = this->getCurrentPercent();
-        StatsManager::get().onUpdateLevel(percent, dt);
+        bool isDead = (m_player1 != nullptr && m_player1->m_isDead);
+        StatsManager::get().onUpdateLevel(percent, dt, isDead);
     }
 
     void resetLevel() {
@@ -28,7 +29,9 @@ class $modify(MobileStatsPlayLayer, PlayLayer) {
 
     void destroyPlayer(PlayerObject* player, GameObject* object) {
         PlayLayer::destroyPlayer(player, object);
-        StatsManager::get().onDeath();
+        if (player == m_player1) {
+            StatsManager::get().onDeath();
+        }
     }
 
     void levelComplete() {

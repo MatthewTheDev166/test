@@ -10,7 +10,7 @@ public:
 
     void onMenu();
     void onEnterLevel(GJGameLevel* level, bool isPractice);
-    void onUpdateLevel(float percent, float dt);
+    void onUpdateLevel(float percent, float dt, bool isDead);
     void onResetRun();
     void onDeath();
     void onPause();

@@ -27,6 +27,9 @@ void StatsManager::onEnterLevel(GJGameLevel* level, bool isPractice) {
     if (level) {
         m_levelName = level->m_levelName;
         m_creatorName = level->m_creatorName;
+        if (m_creatorName.empty()) {
+            m_creatorName = "RobTop";
+        }
         m_levelID = level->m_levelID;
         m_bestPercent = level->m_normalPercent;
         m_totalAttempts = level->m_attempts;
@@ -39,10 +42,14 @@ void StatsManager::onEnterLevel(GJGameLevel* level, bool isPractice) {
     broadcastCurrentState();
 }
 
-void StatsManager::onUpdateLevel(float percent, float dt) {
+void StatsManager::onUpdateLevel(float percent, float dt, bool isDead) {
     m_currentPercent = percent;
     m_sessionTime += dt;
     m_lastBroadcastTimer += dt;
+
+    if (m_state != "paused" && m_state != "level_completed") {
+        m_state = isDead ? "dead" : "playing";
+    }
 
     // Throttle live stream updates to ~20 Hz (every 0.05s) to preserve network & CPU
     if (m_lastBroadcastTimer >= 0.05f) {
@@ -52,6 +59,7 @@ void StatsManager::onUpdateLevel(float percent, float dt) {
 }
 
 void StatsManager::onResetRun() {
+    m_state = "playing";
     m_sessionAttempts++;
     m_totalAttempts++;
     m_currentPercent = 0.0f;
