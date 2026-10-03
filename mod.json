@@ -1,0 +1,47 @@
+{
+	"geode": "5.10.1",
+	"gd": {
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
+	},
+	"id": "matth.gd-mobile-stats",
+	"name": "GD Mobile Stats",
+	"version": "v1.0.0",
+	"developer": "Matthew",
+	"description": "Streams real-time stats and allows StartPos / respawn remote control from a mobile phone over USB (ADB) or Wi-Fi.",
+	"dependencies": {
+		"geode.node-ids": ">=v1.23.3"
+	},
+	"settings": {
+		"server-port": {
+			"name": "Server Port",
+			"description": "Port used by the WebSocket server (default 34567)",
+			"type": "int",
+			"default": 34567,
+			"min": 1024,
+			"max": 65535
+		},
+		"enable-adb-reverse": {
+			"name": "Enable USB ADB Reverse",
+			"description": "Automatically run 'adb reverse' so phone connected via USB-C connects seamlessly",
+			"type": "bool",
+			"default": true
+		},
+		"adb-interval-seconds": {
+			"name": "ADB Check Interval (s)",
+			"description": "How often to check and re-apply adb reverse in the background",
+			"type": "int",
+			"default": 5,
+			"min": 1,
+			"max": 60
+		},
+		"simulate-keys": {
+			"name": "Simulate Keys for MegaHack",
+			"description": "Send Windows key inputs (Q/E for StartPos, R for Respawn) for full MegaHack compatibility",
+			"type": "bool",
+			"default": true
+		}
+	}
+}

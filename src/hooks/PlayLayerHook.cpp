@@ -1,0 +1,43 @@
+#include <Geode/Geode.hpp>
+#include <Geode/modify/PlayLayer.hpp>
+#include "../stats/StatsManager.hpp"
+
+using namespace geode::prelude;
+
+class $modify(MobileStatsPlayLayer, PlayLayer) {
+    bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
+        if (!PlayLayer::init(level, useReplay, dontCreateObjects)) {
+            return false;
+        }
+
+        StatsManager::get().onEnterLevel(level, m_isPracticeMode);
+        return true;
+    }
+
+    void update(float dt) {
+        PlayLayer::update(dt);
+
+        float percent = this->getCurrentPercent();
+        StatsManager::get().onUpdateLevel(percent, dt);
+    }
+
+    void resetLevel() {
+        PlayLayer::resetLevel();
+        StatsManager::get().onResetRun();
+    }
+
+    void destroyPlayer(PlayerObject* player, GameObject* object) {
+        PlayLayer::destroyPlayer(player, object);
+        StatsManager::get().onDeath();
+    }
+
+    void levelComplete() {
+        PlayLayer::levelComplete();
+        StatsManager::get().onComplete();
+    }
+
+    void onQuit() {
+        PlayLayer::onQuit();
+        StatsManager::get().onMenu();
+    }
+};
