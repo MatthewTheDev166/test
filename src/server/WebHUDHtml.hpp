@@ -686,7 +686,7 @@ namespace WebHUD {
       const banner = document.getElementById('state-banner');
       banner.className = 'state-banner ' + state;
       if (state === 'dead') {
-        banner.innerText = 'CRASHED / DEAD';
+        banner.innerText = 'CRASHED';
       } else if (state === 'paused') {
         banner.innerText = 'PAUSED';
       } else if (state === 'level_completed') {

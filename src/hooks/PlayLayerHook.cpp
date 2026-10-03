@@ -5,12 +5,18 @@
 using namespace geode::prelude;
 
 class $modify(MobileStatsPlayLayer, PlayLayer) {
+    struct Fields {
+        bool m_initialized = false;
+    };
+
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
+        m_fields->m_initialized = false;
         if (!PlayLayer::init(level, useReplay, dontCreateObjects)) {
             return false;
         }
 
         StatsManager::get().onEnterLevel(level, m_isPracticeMode);
+        m_fields->m_initialized = true;
         return true;
     }
 
@@ -18,18 +24,38 @@ class $modify(MobileStatsPlayLayer, PlayLayer) {
         PlayLayer::update(dt);
 
         float percent = this->getCurrentPercent();
-        bool isDead = (m_player1 != nullptr && m_player1->m_isDead);
-        StatsManager::get().onUpdateLevel(percent, dt, isDead);
+        StatsManager::get().onUpdateLevel(percent, dt);
     }
 
     void resetLevel() {
         PlayLayer::resetLevel();
-        StatsManager::get().onResetRun();
+        if (m_fields->m_initialized) {
+            StatsManager::get().onResetRun();
+        }
+    }
+
+    void delayedResetLevel() {
+        PlayLayer::delayedResetLevel();
+        if (m_fields->m_initialized) {
+            StatsManager::get().onResetRun();
+        }
+    }
+
+    void loadFromCheckpoint(CheckpointObject* checkpoint) {
+        PlayLayer::loadFromCheckpoint(checkpoint);
+        if (m_fields->m_initialized) {
+            StatsManager::get().onResumeRun();
+        }
+    }
+
+    void resume() {
+        PlayLayer::resume();
+        StatsManager::get().onResume();
     }
 
     void destroyPlayer(PlayerObject* player, GameObject* object) {
         PlayLayer::destroyPlayer(player, object);
-        if (player == m_player1) {
+        if (m_fields->m_initialized && (player == m_player1 || player == m_player2)) {
             StatsManager::get().onDeath();
         }
     }
@@ -40,6 +66,7 @@ class $modify(MobileStatsPlayLayer, PlayLayer) {
     }
 
     void onQuit() {
+        m_fields->m_initialized = false;
         PlayLayer::onQuit();
         StatsManager::get().onMenu();
     }

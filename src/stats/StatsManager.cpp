@@ -42,14 +42,10 @@ void StatsManager::onEnterLevel(GJGameLevel* level, bool isPractice) {
     broadcastCurrentState();
 }
 
-void StatsManager::onUpdateLevel(float percent, float dt, bool isDead) {
+void StatsManager::onUpdateLevel(float percent, float dt) {
     m_currentPercent = percent;
     m_sessionTime += dt;
     m_lastBroadcastTimer += dt;
-
-    if (m_state != "paused" && m_state != "level_completed") {
-        m_state = isDead ? "dead" : "playing";
-    }
 
     // Throttle live stream updates to ~20 Hz (every 0.05s) to preserve network & CPU
     if (m_lastBroadcastTimer >= 0.05f) {
@@ -66,17 +62,25 @@ void StatsManager::onResetRun() {
     broadcastCurrentState();
 }
 
+void StatsManager::onResumeRun() {
+    m_state = "playing";
+    broadcastCurrentState();
+}
+
 void StatsManager::onDeath() {
+    if (m_state == "in_menu" || m_state == "level_completed") return;
     m_state = "dead";
     broadcastCurrentState();
 }
 
 void StatsManager::onPause() {
+    if (m_state == "in_menu") return;
     m_state = "paused";
     broadcastCurrentState();
 }
 
 void StatsManager::onResume() {
+    if (m_state == "in_menu") return;
     m_state = "playing";
     broadcastCurrentState();
 }
