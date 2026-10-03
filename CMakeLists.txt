@@ -14,6 +14,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 if (WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _WINSOCKAPI_)
     target_link_libraries(${PROJECT_NAME} ws2_32)
 endif()
 

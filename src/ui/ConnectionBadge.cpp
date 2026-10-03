@@ -32,19 +32,13 @@ CCMenuItemSpriteExtra* ConnectionBadge::createButton(CCObject* target) {
         icon->addChild(dot);
     }
 
-    auto btn = CCMenuItemSpriteExtra::create(
-        icon,
-        target,
-        menu_selector(ConnectionBadge::onButtonClicked)
-    );
+    auto btn = CCMenuItemExt::createSpriteExtra(icon, [](CCObject*) {
+        auto popup = StatusPopup::create();
+        if (popup) {
+            popup->show();
+        }
+    });
     btn->setID("mobile-stats-badge"_spr);
 
     return btn;
-}
-
-void ConnectionBadge::onButtonClicked(CCObject* sender) {
-    auto popup = StatusPopup::create();
-    if (popup) {
-        popup->show();
-    }
 }
