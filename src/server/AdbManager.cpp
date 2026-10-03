@@ -1,9 +1,12 @@
-#include "AdbManager.hpp"
-#include <Geode/Geode.hpp>
-
-#ifdef GEODE_IS_WINDOWS
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #endif
+
+#include "AdbManager.hpp"
+#include <Geode/Geode.hpp>
 
 #include <chrono>
 #include <sstream>
