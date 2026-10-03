@@ -44,6 +44,29 @@ namespace InputSimulator {
 #endif
     }
 
+    inline void setKeyDown(WORD vk, bool down) {
+#ifdef GEODE_IS_WINDOWS
+        INPUT input = {};
+        input.type = INPUT_KEYBOARD;
+        input.ki.wVk = vk;
+        input.ki.wScan = static_cast<WORD>(MapVirtualKeyA(vk, MAPVK_VK_TO_VSC));
+        input.ki.dwFlags = down ? 0 : KEYEVENTF_KEYUP;
+        SendInput(1, &input, sizeof(INPUT));
+#endif
+    }
+
+    inline void triggerJumpDown() {
+#ifdef GEODE_IS_WINDOWS
+        setKeyDown(VK_UP, true);
+#endif
+    }
+
+    inline void triggerJumpUp() {
+#ifdef GEODE_IS_WINDOWS
+        setKeyDown(VK_UP, false);
+#endif
+    }
+
     inline void triggerPrevStartPos() {
         pressKey('Q');
     }

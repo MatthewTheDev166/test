@@ -35,17 +35,46 @@ void StatsManager::onEnterLevel(GJGameLevel* level, bool isPractice) {
         m_totalAttempts = level->m_attempts;
     }
     m_isPractice = isPractice;
-    m_sessionAttempts = 1;
     m_currentPercent = 0.0f;
     m_sessionTime = 0.0f;
     m_lastBroadcastTimer = 0.0f;
+
+    // Reset attempt CPS stats
+    {
+        std::lock_guard<std::mutex> lock(m_cpsMutex);
+        m_attemptClicks = 0;
+        m_currentCPS = 0;
+        m_peakCPS = 0;
+        m_clickTimestamps.clear();
+    }
+
     broadcastCurrentState();
 }
 
 void StatsManager::onUpdateLevel(float percent, float dt) {
-    m_currentPercent = percent;
-    m_sessionTime += dt;
+    if (m_state == "level_completed") {
+        m_currentPercent = 100.0f;
+    } else {
+        m_currentPercent = percent;
+    }
+
+    // Only count gameplay time while actively playing (not paused)
+    if (m_state == "playing") {
+        m_sessionTime += dt;
+    }
+
     m_lastBroadcastTimer += dt;
+
+    // Decay current CPS over sliding 1-second window
+    {
+        std::lock_guard<std::mutex> lock(m_cpsMutex);
+        auto now = std::chrono::steady_clock::now();
+        while (!m_clickTimestamps.empty() && 
+               std::chrono::duration<float>(now - m_clickTimestamps.front()).count() > 1.0f) {
+            m_clickTimestamps.pop_front();
+        }
+        m_currentCPS = static_cast<int>(m_clickTimestamps.size());
+    }
 
     // Throttle live stream updates to ~20 Hz (every 0.05s) to preserve network & CPU
     if (m_lastBroadcastTimer >= 0.05f) {
@@ -56,9 +85,19 @@ void StatsManager::onUpdateLevel(float percent, float dt) {
 
 void StatsManager::onResetRun() {
     m_state = "playing";
-    m_sessionAttempts++;
     m_totalAttempts++;
     m_currentPercent = 0.0f;
+
+    // Reset CPS for new attempt
+    {
+        std::lock_guard<std::mutex> lock(m_cpsMutex);
+        m_attemptClicks = 0;
+        m_currentCPS = 0;
+        m_peakCPS = 0;
+        m_clickTimestamps.clear();
+    }
+
+    InputSimulator::triggerJumpUp();
     broadcastCurrentState();
 }
 
@@ -70,12 +109,15 @@ void StatsManager::onResumeRun() {
 void StatsManager::onDeath() {
     if (m_state == "in_menu" || m_state == "level_completed") return;
     m_state = "dead";
+    m_currentCPS = 0;
+    InputSimulator::triggerJumpUp();
     broadcastCurrentState();
 }
 
 void StatsManager::onPause() {
     if (m_state == "in_menu") return;
     m_state = "paused";
+    InputSimulator::triggerJumpUp();
     broadcastCurrentState();
 }
 
@@ -88,7 +130,25 @@ void StatsManager::onResume() {
 void StatsManager::onComplete() {
     m_state = "level_completed";
     m_currentPercent = 100.0f;
+    InputSimulator::triggerJumpUp();
     broadcastCurrentState();
+}
+
+void StatsManager::registerClick() {
+    std::lock_guard<std::mutex> lock(m_cpsMutex);
+    auto now = std::chrono::steady_clock::now();
+    m_clickTimestamps.push_back(now);
+    m_attemptClicks++;
+
+    while (!m_clickTimestamps.empty() && 
+           std::chrono::duration<float>(now - m_clickTimestamps.front()).count() > 1.0f) {
+        m_clickTimestamps.pop_front();
+    }
+
+    m_currentCPS = static_cast<int>(m_clickTimestamps.size());
+    if (m_currentCPS > m_peakCPS) {
+        m_peakCPS = m_currentCPS;
+    }
 }
 
 void StatsManager::broadcastCurrentState() {
@@ -110,12 +170,17 @@ void StatsManager::broadcastCurrentState() {
 
     matjson::Value att;
     att["total"] = m_totalAttempts;
-    att["session"] = m_sessionAttempts;
     json["attempts"] = att;
 
     matjson::Value t;
     t["session_seconds"] = m_sessionTime;
     json["time"] = t;
+
+    matjson::Value cps;
+    cps["current"] = m_currentCPS;
+    cps["peak"] = m_peakCPS;
+    cps["total_clicks"] = m_attemptClicks;
+    json["cps"] = cps;
 
     WebSocketServer::get().broadcast(json.dump());
 }
@@ -134,7 +199,15 @@ void StatsManager::handleClientMessage(const std::string& message) {
     std::string action = json["action"].asString().unwrapOr("");
     bool simulateKeys = Mod::get()->getSettingValue<bool>("simulate-keys");
 
-    if (action == "prev_startpos" || action == "q") {
+    if (action == "jump_down" || action == "jump") {
+        geode::queueInMainThread([]() {
+            InputSimulator::triggerJumpDown();
+        });
+    } else if (action == "jump_up") {
+        geode::queueInMainThread([]() {
+            InputSimulator::triggerJumpUp();
+        });
+    } else if (action == "prev_startpos" || action == "q") {
         geode::queueInMainThread([simulateKeys]() {
             if (simulateKeys) {
                 InputSimulator::triggerPrevStartPos();

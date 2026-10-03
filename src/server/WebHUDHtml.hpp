@@ -69,8 +69,8 @@ namespace WebHUD {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 16px;
-    background: rgba(13, 17, 23, 0.8);
+    padding: 8px 14px;
+    background: rgba(13, 17, 23, 0.85);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
   }
@@ -80,19 +80,25 @@ namespace WebHUD {
     align-items: center;
     gap: 8px;
     font-weight: 800;
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 1px;
     color: var(--cyan);
     text-transform: uppercase;
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .status-badge {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
-    padding: 4px 10px;
+    padding: 4px 8px;
     border-radius: 20px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border);
@@ -110,14 +116,23 @@ namespace WebHUD {
     box-shadow: 0 0 8px var(--green);
   }
 
-  .btn-fs {
-    background: transparent;
+  .btn-top {
+    background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border);
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 700;
     padding: 4px 8px;
     border-radius: 6px;
     cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-pad-toggle.active {
+    background: rgba(0, 255, 240, 0.15);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan-glow);
   }
 
   /* Container */
@@ -127,8 +142,8 @@ namespace WebHUD {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 14px;
-    gap: 14px;
+    padding: 12px;
+    gap: 12px;
     max-width: 900px;
     width: 100%;
     margin: 0 auto;
@@ -147,8 +162,8 @@ namespace WebHUD {
   }
 
   .radar-ring {
-    width: 90px;
-    height: 90px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
     border: 2px solid var(--cyan);
     position: relative;
@@ -166,14 +181,14 @@ namespace WebHUD {
   }
 
   .radar-icon {
-    font-size: 36px;
+    font-size: 34px;
   }
 
   /* HUD Active Screen */
   #hud-screen {
     display: none;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     flex: 1;
   }
 
@@ -182,7 +197,7 @@ namespace WebHUD {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 16px;
+    padding: 14px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -194,7 +209,7 @@ namespace WebHUD {
   }
 
   .level-name {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #fff;
     white-space: nowrap;
@@ -231,10 +246,10 @@ namespace WebHUD {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 18px;
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 
@@ -245,7 +260,7 @@ namespace WebHUD {
   }
 
   .percent-main {
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 900;
     color: var(--cyan);
     text-shadow: 0 0 25px var(--cyan-glow);
@@ -264,7 +279,7 @@ namespace WebHUD {
 
   .progress-track {
     width: 100%;
-    height: 14px;
+    height: 12px;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     overflow: hidden;
@@ -278,37 +293,7 @@ namespace WebHUD {
     background: linear-gradient(90deg, #00d2ff, var(--cyan));
     box-shadow: 0 0 15px var(--cyan);
     border-radius: 10px;
-    transition: width 0.1s linear;
-  }
-
-  /* Stats Grid */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .stat-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
-    text-align: center;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .stat-val {
-    font-size: 18px;
-    font-weight: 800;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
+    transition: width 0.08s linear;
   }
 
   /* Status Banner */
@@ -345,13 +330,109 @@ namespace WebHUD {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
   }
 
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .stat-box.span-3 {
+    grid-column: span 3;
+  }
+
+  .stat-box.span-2 {
+    grid-column: span 2;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-val {
+    font-size: 17px;
+    font-weight: 800;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Phone Touch Jump Pad */
+  .touch-jump-pad {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 255, 240, 0.08), rgba(0, 150, 255, 0.04));
+    border: 2px dashed rgba(0, 255, 240, 0.4);
+    border-radius: 16px;
+    padding: 22px 14px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: all 0.08s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .touch-jump-pad.active {
+    background: linear-gradient(135deg, rgba(0, 255, 240, 0.35), rgba(0, 255, 102, 0.25));
+    border-color: #00fff0;
+    border-style: solid;
+    box-shadow: 0 0 30px var(--cyan-glow), inset 0 0 20px rgba(0, 255, 240, 0.25);
+    transform: scale(0.98);
+  }
+
+  .touch-jump-pad .pad-icon {
+    font-size: 32px;
+    color: var(--cyan);
+    text-shadow: 0 0 14px var(--cyan-glow);
+    pointer-events: none;
+    transition: transform 0.08s;
+  }
+
+  .touch-jump-pad.active .pad-icon {
+    transform: scale(1.2);
+    color: #fff;
+  }
+
+  .touch-jump-pad .pad-title {
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #fff;
+    pointer-events: none;
+  }
+
+  .touch-jump-pad .pad-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    pointer-events: none;
+  }
+
   /* Remote Controller Buttons */
   .controller-bar {
     display: grid;
     grid-template-columns: 1fr 1.2fr 1fr;
-    gap: 12px;
+    gap: 10px;
     margin-top: auto;
-    padding-top: 10px;
+    padding-top: 6px;
   }
 
   .ctrl-btn {
@@ -359,8 +440,8 @@ namespace WebHUD {
     border: none;
     outline: none;
     border-radius: 14px;
-    padding: 16px 8px;
-    font-size: 15px;
+    padding: 14px 6px;
+    font-size: 14px;
     font-weight: 800;
     color: #fff;
     cursor: pointer;
@@ -368,7 +449,7 @@ namespace WebHUD {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     transition: transform 0.08s, filter 0.08s;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   }
@@ -383,7 +464,7 @@ namespace WebHUD {
     border: 1px solid rgba(0, 255, 240, 0.3);
   }
   .btn-pos .btn-sub {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--cyan);
     font-weight: 700;
   }
@@ -394,7 +475,7 @@ namespace WebHUD {
     box-shadow: 0 4px 18px var(--red-glow);
   }
   .btn-respawn .btn-sub {
-    font-size: 10px;
+    font-size: 9px;
     color: rgba(255, 255, 255, 0.8);
     font-weight: 700;
   }
@@ -402,16 +483,17 @@ namespace WebHUD {
   /* ----------------- LANDSCAPE MODE ----------------- */
   @media (orientation: landscape) and (max-height: 550px) {
     .top-bar {
-      padding: 6px 14px;
+      padding: 5px 12px;
     }
     .main-content {
       padding: 8px 12px;
       gap: 8px;
+      max-width: 100%;
     }
     #hud-screen {
       display: none;
       flex-direction: row;
-      gap: 12px;
+      gap: 10px;
     }
     .hud-col-left {
       flex: 1.1;
@@ -426,36 +508,52 @@ namespace WebHUD {
       gap: 8px;
     }
     .level-card {
-      padding: 10px 14px;
+      padding: 8px 12px;
     }
     .level-name {
-      font-size: 18px;
+      font-size: 17px;
     }
     .progress-card {
-      padding: 10px 14px;
-      gap: 6px;
+      padding: 8px 12px;
+      gap: 4px;
     }
     .percent-main {
-      font-size: 38px;
+      font-size: 34px;
     }
     .stats-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 6px;
     }
     .stat-box {
-      padding: 6px;
+      padding: 5px 4px;
+    }
+    .stat-label {
+      font-size: 9px;
     }
     .stat-val {
-      font-size: 15px;
+      font-size: 14px;
+    }
+    .touch-jump-pad {
+      padding: 10px 8px;
+      gap: 2px;
+    }
+    .touch-jump-pad .pad-icon {
+      font-size: 20px;
+    }
+    .touch-jump-pad .pad-title {
+      font-size: 13px;
+    }
+    .touch-jump-pad .pad-sub {
+      font-size: 9px;
     }
     .controller-bar {
       margin-top: auto;
       padding-top: 0;
-      gap: 8px;
+      gap: 6px;
     }
     .ctrl-btn {
-      padding: 12px 6px;
-      font-size: 14px;
+      padding: 8px 4px;
+      font-size: 12px;
     }
   }
 </style>
@@ -467,12 +565,13 @@ namespace WebHUD {
     <div class="brand">
       <span>⚡ GD HUD</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <div class="top-actions">
       <div class="status-badge">
         <div class="status-dot" id="status-dot"></div>
         <span id="status-text">Connecting...</span>
       </div>
-      <button class="btn-fs" id="fs-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      <button class="btn-top btn-pad-toggle" id="pad-toggle-btn" onclick="toggleJumpPad()">🎮 Touch Jump: OFF</button>
+      <button class="btn-top btn-fs" id="fs-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
     </div>
   </div>
 
@@ -484,7 +583,7 @@ namespace WebHUD {
         <span class="radar-icon">🎮</span>
       </div>
       <h2 style="font-weight: 800; font-size: 20px; color: #fff;">GD Main Menu</h2>
-      <p style="color: var(--text-muted); font-size: 13px; max-width: 260px;">
+      <p style="color: var(--text-muted); font-size: 13px; max-width: 280px;">
         Geometry Dash is in menu. Select or start a level to stream live stats!
       </p>
     </div>
@@ -495,7 +594,7 @@ namespace WebHUD {
         <!-- Level Info -->
         <div class="level-card">
           <div class="level-info">
-            <div class="level-name" id="level-name">Stereo Madness</div>
+            <div class="level-name" id="level-name">Level Name</div>
             <div class="creator-name" id="creator-name">by RobTop</div>
           </div>
           <div class="mode-pill" id="mode-pill">NORMAL</div>
@@ -519,18 +618,33 @@ namespace WebHUD {
       <div class="hud-col-right">
         <!-- Stats Grid -->
         <div class="stats-grid">
-          <div class="stat-box">
-            <div class="stat-label">Session</div>
-            <div class="stat-val" id="sess-att">0</div>
-          </div>
-          <div class="stat-box">
+          <div class="stat-box span-3">
             <div class="stat-label">Total Att</div>
             <div class="stat-val" id="tot-att">0</div>
           </div>
-          <div class="stat-box">
-            <div class="stat-label">Time</div>
+          <div class="stat-box span-3">
+            <div class="stat-label">Level Time</div>
             <div class="stat-val" id="time-val">00:00</div>
           </div>
+          <div class="stat-box span-2">
+            <div class="stat-label">Current CPS</div>
+            <div class="stat-val" id="cps-curr" style="color: var(--cyan);">0</div>
+          </div>
+          <div class="stat-box span-2">
+            <div class="stat-label">Peak CPS</div>
+            <div class="stat-val" id="cps-peak" style="color: var(--gold);">0</div>
+          </div>
+          <div class="stat-box span-2">
+            <div class="stat-label">Clicks</div>
+            <div class="stat-val" id="cps-clicks">0</div>
+          </div>
+        </div>
+
+        <!-- Phone Touch Jump Pad -->
+        <div id="touch-jump-pad" class="touch-jump-pad">
+          <div class="pad-icon">▲</div>
+          <div class="pad-title">HOLD / TAP TO JUMP</div>
+          <div class="pad-sub">Simulates Up Arrow Key</div>
         </div>
 
         <!-- Controller Buttons -->
@@ -556,6 +670,8 @@ namespace WebHUD {
   <script>
     let ws = null;
     let wakeLock = null;
+    let isJumpPressed = false;
+    let padEnabled = (localStorage.getItem('gd_touch_pad') === 'true');
 
     // Wake Lock to keep phone screen awake
     async function requestWakeLock() {
@@ -582,21 +698,95 @@ namespace WebHUD {
       }
     }
 
-    // Vibration Haptics & WebSocket Commands
-    function sendAction(action) {
-      if (navigator.vibrate) {
-        navigator.vibrate(35);
+    // Touch Pad Toggle Mode
+    function updatePadUI() {
+      const pad = document.getElementById('touch-jump-pad');
+      const btn = document.getElementById('pad-toggle-btn');
+      if (padEnabled) {
+        pad.style.display = 'flex';
+        btn.classList.add('active');
+        btn.innerText = '🎮 Touch Jump: ON';
+      } else {
+        pad.style.display = 'none';
+        btn.classList.remove('active');
+        btn.innerText = '🎮 Touch Jump: OFF';
       }
+    }
+
+    function toggleJumpPad() {
+      padEnabled = !padEnabled;
+      localStorage.setItem('gd_touch_pad', padEnabled ? 'true' : 'false');
+      updatePadUI();
+      if (navigator.vibrate) navigator.vibrate(25);
+    }
+
+    // Touch Pad Press / Release Handlers
+    function onJumpPress(e) {
+      if (e) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!isJumpPressed) {
+        isJumpPressed = true;
+        document.getElementById('touch-jump-pad').classList.add('active');
+        if (navigator.vibrate) navigator.vibrate(15);
+        sendRawAction('jump_down');
+      }
+    }
+
+    function onJumpRelease(e) {
+      if (e) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+      }
+      if (isJumpPressed) {
+        isJumpPressed = false;
+        document.getElementById('touch-jump-pad').classList.remove('active');
+        sendRawAction('jump_up');
+      }
+    }
+
+    // Setup Touch / Mouse listeners on the jump pad
+    const jumpPadEl = document.getElementById('touch-jump-pad');
+    jumpPadEl.addEventListener('touchstart', onJumpPress, { passive: false });
+    jumpPadEl.addEventListener('touchend', onJumpRelease, { passive: false });
+    jumpPadEl.addEventListener('touchcancel', onJumpRelease, { passive: false });
+    jumpPadEl.addEventListener('mousedown', onJumpPress);
+    jumpPadEl.addEventListener('mouseup', onJumpRelease);
+    jumpPadEl.addEventListener('mouseleave', onJumpRelease);
+
+    // Safety: release jump if page blurs or hides
+    window.addEventListener('blur', () => onJumpRelease(null));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') onJumpRelease(null);
+    });
+
+    // Raw WebSocket transmission
+    function sendRawAction(action) {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ action: action }));
       }
     }
 
-    // Keyboard support for desktop testing
+    // Buttons Vibration Haptics & WebSocket Commands
+    function sendAction(action) {
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
+      }
+      sendRawAction(action);
+    }
+
+    // Keyboard support for testing
     window.addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      if (e.code === 'Space' || e.code === 'ArrowUp') onJumpPress(null);
       if (e.key === 'q' || e.key === 'Q') sendAction('prev_startpos');
       if (e.key === 'e' || e.key === 'E') sendAction('next_startpos');
       if (e.key === 'r' || e.key === 'R') sendAction('respawn');
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'Space' || e.code === 'ArrowUp') onJumpRelease(null);
     });
 
     function formatTime(seconds) {
@@ -618,7 +808,7 @@ namespace WebHUD {
       ws.onopen = () => {
         dot.className = 'status-dot connected';
         text.innerText = 'Connected';
-        ws.send(JSON.stringify({ action: 'request_sync' }));
+        sendRawAction('request_sync');
       };
 
       ws.onmessage = (event) => {
@@ -631,6 +821,7 @@ namespace WebHUD {
       ws.onclose = () => {
         dot.className = 'status-dot';
         text.innerText = 'Disconnected';
+        onJumpRelease(null);
         setTimeout(connect, 1500);
       };
 
@@ -669,18 +860,26 @@ namespace WebHUD {
 
       // Progress
       const prog = data.progress || {};
-      const pct = (prog.current_percent || 0.0);
+      let pct = (prog.current_percent || 0.0);
+      if (state === 'level_completed') {
+        pct = 100.0;
+      }
       document.getElementById('percent-val').innerText = pct.toFixed(1) + '%';
       document.getElementById('best-val').innerText = (prog.best_percent || 0) + '%';
       document.getElementById('progress-fill').style.width = Math.min(100, Math.max(0, pct)) + '%';
 
       // Stats
       const att = data.attempts || {};
-      document.getElementById('sess-att').innerText = att.session || 0;
       document.getElementById('tot-att').innerText = att.total || 0;
 
       const t = data.time || {};
       document.getElementById('time-val').innerText = formatTime(t.session_seconds || 0);
+
+      // CPS Stats
+      const cps = data.cps || {};
+      document.getElementById('cps-curr').innerText = (cps.current || 0);
+      document.getElementById('cps-peak').innerText = (cps.peak || 0);
+      document.getElementById('cps-clicks').innerText = (cps.total_clicks || 0);
 
       // State Banner
       const banner = document.getElementById('state-banner');
@@ -696,6 +895,8 @@ namespace WebHUD {
       }
     }
 
+    // Init UI
+    updatePadUI();
     connect();
   </script>
 </body>
