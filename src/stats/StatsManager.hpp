@@ -31,6 +31,7 @@ public:
     float getCurrentPercent() const { return m_currentPercent; }
     int getBestPercent() const { return m_bestPercent; }
     int getTotalAttempts() const { return m_totalAttempts; }
+    int getSessionAttempts() const { return m_sessionAttempts; }
     float getSessionTime() const { return m_sessionTime; }
     bool isPractice() const { return m_isPractice; }
 
@@ -51,6 +52,7 @@ private:
     float m_currentPercent{0.0f};
     int m_bestPercent{0};
     int m_totalAttempts{0};
+    int m_sessionAttempts{0};
     float m_sessionTime{0.0f};
 
     // CPS & Spam Tracking (for current attempt)

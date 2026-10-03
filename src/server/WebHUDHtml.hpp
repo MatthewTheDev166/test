@@ -122,17 +122,27 @@ namespace WebHUD {
     color: var(--text-muted);
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
   }
 
-  .btn-pad-toggle.active {
-    background: rgba(0, 255, 240, 0.15);
-    border-color: var(--cyan);
+  .btn-pad-toggle {
+    background: rgba(0, 255, 240, 0.12);
+    border: 1.5px solid rgba(0, 255, 240, 0.45);
     color: var(--cyan);
-    box-shadow: 0 0 10px var(--cyan-glow);
+    font-size: 13px;
+    font-weight: 800;
+    padding: 8px 14px;
+    border-radius: 20px;
+  }
+
+  .btn-pad-toggle.active {
+    background: linear-gradient(135deg, rgba(0, 255, 240, 0.35), rgba(0, 255, 102, 0.25));
+    border-color: var(--cyan);
+    color: #fff;
+    box-shadow: 0 0 14px var(--cyan-glow);
   }
 
   /* Container */
@@ -372,58 +382,62 @@ namespace WebHUD {
   /* Phone Touch Jump Pad */
   .touch-jump-pad {
     position: relative;
-    background: linear-gradient(135deg, rgba(0, 255, 240, 0.08), rgba(0, 150, 255, 0.04));
-    border: 2px dashed rgba(0, 255, 240, 0.4);
-    border-radius: 16px;
-    padding: 22px 14px;
+    background: linear-gradient(135deg, rgba(0, 255, 240, 0.12), rgba(0, 150, 255, 0.06));
+    border: 2.5px dashed rgba(0, 255, 240, 0.55);
+    border-radius: 20px;
+    min-height: 135px;
+    padding: 26px 18px;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 6px;
     cursor: pointer;
     touch-action: none;
     -webkit-touch-callout: none;
     user-select: none;
     -webkit-user-select: none;
     transition: all 0.08s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(0, 255, 240, 0.05);
   }
 
   .touch-jump-pad.active {
-    background: linear-gradient(135deg, rgba(0, 255, 240, 0.35), rgba(0, 255, 102, 0.25));
+    background: linear-gradient(135deg, rgba(0, 255, 240, 0.45), rgba(0, 255, 102, 0.35));
     border-color: #00fff0;
     border-style: solid;
-    box-shadow: 0 0 30px var(--cyan-glow), inset 0 0 20px rgba(0, 255, 240, 0.25);
-    transform: scale(0.98);
+    box-shadow: 0 0 40px var(--cyan-glow), inset 0 0 25px rgba(0, 255, 240, 0.4);
+    transform: scale(0.97);
   }
 
   .touch-jump-pad .pad-icon {
-    font-size: 32px;
+    font-size: 46px;
     color: var(--cyan);
-    text-shadow: 0 0 14px var(--cyan-glow);
+    text-shadow: 0 0 18px var(--cyan-glow);
     pointer-events: none;
     transition: transform 0.08s;
   }
 
   .touch-jump-pad.active .pad-icon {
-    transform: scale(1.2);
+    transform: scale(1.25);
     color: #fff;
+    text-shadow: 0 0 25px #fff;
   }
 
   .touch-jump-pad .pad-title {
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 900;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     color: #fff;
     pointer-events: none;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
 
   .touch-jump-pad .pad-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 600;
+    font-size: 12px;
+    color: rgba(240, 246, 252, 0.75);
+    font-weight: 700;
     pointer-events: none;
+    letter-spacing: 0.5px;
   }
 
   /* Remote Controller Buttons */
@@ -534,17 +548,18 @@ namespace WebHUD {
       font-size: 14px;
     }
     .touch-jump-pad {
-      padding: 10px 8px;
-      gap: 2px;
+      min-height: 90px;
+      padding: 14px 10px;
+      gap: 3px;
     }
     .touch-jump-pad .pad-icon {
-      font-size: 20px;
+      font-size: 28px;
     }
     .touch-jump-pad .pad-title {
-      font-size: 13px;
+      font-size: 15px;
     }
     .touch-jump-pad .pad-sub {
-      font-size: 9px;
+      font-size: 10px;
     }
     .controller-bar {
       margin-top: auto;
@@ -586,6 +601,13 @@ namespace WebHUD {
       <p style="color: var(--text-muted); font-size: 13px; max-width: 280px;">
         Geometry Dash is in menu. Select or start a level to stream live stats!
       </p>
+
+      <!-- Standby Touch Jump Pad -->
+      <div class="touch-jump-pad" style="width: 100%; max-width: 340px; margin-top: 12px;">
+        <div class="pad-icon">▲</div>
+        <div class="pad-title">HOLD / TAP TO JUMP</div>
+        <div class="pad-sub">Active & ready for gameplay</div>
+      </div>
     </div>
 
     <!-- Active Gameplay HUD Screen -->
@@ -619,7 +641,7 @@ namespace WebHUD {
         <!-- Stats Grid -->
         <div class="stats-grid">
           <div class="stat-box span-3">
-            <div class="stat-label">Total Att</div>
+            <div class="stat-label">Att (Sess/Tot)</div>
             <div class="stat-val" id="tot-att">0</div>
           </div>
           <div class="stat-box span-3">
@@ -700,14 +722,15 @@ namespace WebHUD {
 
     // Touch Pad Toggle Mode
     function updatePadUI() {
-      const pad = document.getElementById('touch-jump-pad');
+      const pads = document.querySelectorAll('.touch-jump-pad');
       const btn = document.getElementById('pad-toggle-btn');
+      pads.forEach(p => {
+        p.style.display = padEnabled ? 'flex' : 'none';
+      });
       if (padEnabled) {
-        pad.style.display = 'flex';
         btn.classList.add('active');
         btn.innerText = '🎮 Touch Jump: ON';
       } else {
-        pad.style.display = 'none';
         btn.classList.remove('active');
         btn.innerText = '🎮 Touch Jump: OFF';
       }
@@ -728,7 +751,7 @@ namespace WebHUD {
       }
       if (!isJumpPressed) {
         isJumpPressed = true;
-        document.getElementById('touch-jump-pad').classList.add('active');
+        document.querySelectorAll('.touch-jump-pad').forEach(p => p.classList.add('active'));
         if (navigator.vibrate) navigator.vibrate(15);
         sendRawAction('jump_down');
       }
@@ -741,19 +764,23 @@ namespace WebHUD {
       }
       if (isJumpPressed) {
         isJumpPressed = false;
-        document.getElementById('touch-jump-pad').classList.remove('active');
+        document.querySelectorAll('.touch-jump-pad').forEach(p => p.classList.remove('active'));
         sendRawAction('jump_up');
       }
     }
 
-    // Setup Touch / Mouse listeners on the jump pad
-    const jumpPadEl = document.getElementById('touch-jump-pad');
-    jumpPadEl.addEventListener('touchstart', onJumpPress, { passive: false });
-    jumpPadEl.addEventListener('touchend', onJumpRelease, { passive: false });
-    jumpPadEl.addEventListener('touchcancel', onJumpRelease, { passive: false });
-    jumpPadEl.addEventListener('mousedown', onJumpPress);
-    jumpPadEl.addEventListener('mouseup', onJumpRelease);
-    jumpPadEl.addEventListener('mouseleave', onJumpRelease);
+    // Setup Touch / Mouse listeners on all jump pads
+    function setupJumpPads() {
+      const pads = document.querySelectorAll('.touch-jump-pad');
+      pads.forEach(jumpPadEl => {
+        jumpPadEl.addEventListener('touchstart', onJumpPress, { passive: false });
+        jumpPadEl.addEventListener('touchend', onJumpRelease, { passive: false });
+        jumpPadEl.addEventListener('touchcancel', onJumpRelease, { passive: false });
+        jumpPadEl.addEventListener('mousedown', onJumpPress);
+        jumpPadEl.addEventListener('mouseup', onJumpRelease);
+        jumpPadEl.addEventListener('mouseleave', onJumpRelease);
+      });
+    }
 
     // Safety: release jump if page blurs or hides
     window.addEventListener('blur', () => onJumpRelease(null));
@@ -870,7 +897,9 @@ namespace WebHUD {
 
       // Stats
       const att = data.attempts || {};
-      document.getElementById('tot-att').innerText = att.total || 0;
+      const tot = att.total || 0;
+      const sess = att.session || 0;
+      document.getElementById('tot-att').innerText = sess > 0 ? (sess + ' / ' + tot) : tot;
 
       const t = data.time || {};
       document.getElementById('time-val').innerText = formatTime(t.session_seconds || 0);
@@ -896,6 +925,7 @@ namespace WebHUD {
     }
 
     // Init UI
+    setupJumpPads();
     updatePadUI();
     connect();
   </script>

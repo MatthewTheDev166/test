@@ -34,6 +34,7 @@ void StatsManager::onEnterLevel(GJGameLevel* level, bool isPractice) {
         m_bestPercent = level->m_normalPercent;
         m_totalAttempts = level->m_attempts;
     }
+    m_sessionAttempts = 1;
     m_isPractice = isPractice;
     m_currentPercent = 0.0f;
     m_sessionTime = 0.0f;
@@ -86,6 +87,7 @@ void StatsManager::onUpdateLevel(float percent, float dt) {
 void StatsManager::onResetRun() {
     m_state = "playing";
     m_totalAttempts++;
+    m_sessionAttempts++;
     m_currentPercent = 0.0f;
 
     // Reset CPS for new attempt
@@ -170,6 +172,7 @@ void StatsManager::broadcastCurrentState() {
 
     matjson::Value att;
     att["total"] = m_totalAttempts;
+    att["session"] = m_sessionAttempts;
     json["attempts"] = att;
 
     matjson::Value t;

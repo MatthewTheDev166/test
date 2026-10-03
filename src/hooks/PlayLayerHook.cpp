@@ -1,19 +1,26 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/PlayerObject.hpp>
 #include "../stats/StatsManager.hpp"
+#include <cmath>
+#include <algorithm>
 
 using namespace geode::prelude;
 
-#include <Geode/modify/GJBaseGameLayer.hpp>
+class $modify(MobileStatsPlayerObject, PlayerObject) {
+    bool pushButton(PlayerButton button) {
+        bool res = PlayerObject::pushButton(button);
 
-class $modify(MobileStatsBaseGameLayer, GJBaseGameLayer) {
-    void handleButton(bool down, int button, bool isPlayer1) {
-        GJBaseGameLayer::handleButton(down, button, isPlayer1);
-
-        // Track clicks when pushed down for player 1 in gameplay
-        if (down && isPlayer1 && PlayLayer::get()) {
-            StatsManager::get().registerClick();
+        // Track player 1 jump clicks reliably across keyboard, mouse, touch, and controller
+        if (button == PlayerButton::Jump) {
+            if (auto pl = PlayLayer::get()) {
+                if (this == pl->m_player1) {
+                    StatsManager::get().registerClick();
+                }
+            }
         }
+
+        return res;
     }
 };
 
@@ -33,47 +40,20 @@ class $modify(MobileStatsPlayLayer, PlayLayer) {
         return true;
     }
 
-    void update(float dt) {
-        PlayLayer::update(dt);
+    void postUpdate(float dt) {
+        PlayLayer::postUpdate(dt);
 
         float percent = 0.0f;
-
         if (m_hasCompletedLevel) {
             percent = 100.0f;
+        } else if (m_isPlatformer) {
+            percent = 0.0f;
         } else {
-            // 1. Native getCurrentPercent()
             percent = this->getCurrentPercent();
-
-            // Detect 0.0 to 1.0 fraction
-            if (percent > 0.0f && percent <= 1.0f && m_player1 && m_player1->getPositionX() > 300.0f) {
-                percent *= 100.0f;
+            if (std::isnan(percent) || std::isinf(percent)) {
+                percent = 0.0f;
             }
-
-            // 2. Read in-game percentage label if active
-            if (m_percentageLabel && m_percentageLabel->getString()) {
-                std::string_view labelStr = m_percentageLabel->getString();
-                auto pctPos = labelStr.find('%');
-                if (pctPos != std::string_view::npos) {
-                    try {
-                        float parsed = std::stof(std::string(labelStr.substr(0, pctPos)));
-                        if (parsed > percent) {
-                            percent = parsed;
-                        }
-                    } catch (...) {}
-                }
-            }
-
-            // 3. Fallback: player X / level length
-            if (percent <= 0.0f && m_player1 && !m_isPlatformer) {
-                float len = m_levelLength;
-                if (len <= 0.0f && m_endPortal) {
-                    len = m_endPortal->getPositionX();
-                }
-                if (len > 0.0f) {
-                    float curX = m_player1->getPositionX();
-                    percent = std::clamp((curX / len) * 100.0f, 0.0f, 100.0f);
-                }
-            }
+            percent = std::clamp(percent, 0.0f, 100.0f);
         }
 
         StatsManager::get().onUpdateLevel(percent, dt);
@@ -81,13 +61,6 @@ class $modify(MobileStatsPlayLayer, PlayLayer) {
 
     void resetLevel() {
         PlayLayer::resetLevel();
-        if (m_fields->m_initialized) {
-            StatsManager::get().onResetRun();
-        }
-    }
-
-    void delayedResetLevel() {
-        PlayLayer::delayedResetLevel();
         if (m_fields->m_initialized) {
             StatsManager::get().onResetRun();
         }
