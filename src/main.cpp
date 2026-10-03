@@ -23,7 +23,7 @@ $on_mod(Loaded) {
     AdbManager::get().start(port);
 
     // Listen to setting changes
-    listenForSettingChanges("server-port", [](int64_t newPort) {
+    listenForSettingChanges<int64_t>("server-port", [](int64_t newPort) {
         if (newPort > 0 && newPort <= 65535) {
             uint16_t p = static_cast<uint16_t>(newPort);
             WebSocketServer::get().start(p);
